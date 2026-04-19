@@ -1,0 +1,20 @@
+{
+  "name": "personalized-growth-chart-companion",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "build:pages": "tsc && vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "fhirclient": "^2.5.10"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-basic-ssl": "^1.1.0",
+    "typescript": "^5.6.3",
+    "vite": "^5.4.10"
+  }
+}
