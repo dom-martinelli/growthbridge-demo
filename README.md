@@ -1,45 +1,77 @@
-# Personalized Growth Chart Companion
+# GrowthBridge Demo
 
-Patient-facing SMART on FHIR demo scaffold for Epic sandbox testing.
+GrowthBridge is a patient-facing SMART on FHIR demo for the Epic sandbox. It is built as a small Vite app that can run locally over HTTPS or be deployed to GitHub Pages for a stable public launch URL.
 
-This app now supports two deployment modes:
+The current demo focuses on a polished growth-review experience:
 
-- local HTTPS dev for fast iteration
-- GitHub Pages for a stable public Epic launch URL
-
-The app includes:
-
-- `launch.html` as the SMART authorize entry point
-- `index.html` as the app redirect target and patient view
+- SMART launch entry at `launch.html`
+- patient view at `index.html`
+- combined interactive height and weight chart
+- hover tooltips for each measurement date
 - mock demo scenarios, including a Turner syndrome teaching case
-- a combined interactive height/weight chart with hover tooltips
-- a flagged interpretation banner for demo storytelling
+- conservative flagged interpretation text for demo storytelling
 
-## Best Recommendation
+## What This Repo Is
 
-If your goal is to demo Epic sandbox launch without fighting `localhost`, GitHub Pages is a good fit for this app.
+This is a browser-based demo app, not a production clinical product. It reads patient and observation data from the Epic sandbox and overlays a lightweight presentation layer for demo purposes.
 
-For Epic registration, a public Pages URL is simpler than local HTTPS because:
+Current scope:
 
-- Epic can redirect to a stable HTTPS domain
-- you avoid local certificate warnings
-- other people can test the same deployed URL
+- read-only SMART on FHIR app
+- Epic sandbox-compatible launch flow
+- GitHub Pages deployment support
+- local browser storage for home-entered measurements
 
-## Local HTTPS Dev
+Out of scope right now:
 
-### 1. Install dependencies
+- FHIR write-back
+- production auth/backend services
+- validated CDC/WHO percentile engine
+- condition-specific clinical decision support
+
+## Stack
+
+- Vite
+- TypeScript
+- [`fhirclient`](https://github.com/smart-on-fhir/client-js)
+- GitHub Pages
+- Epic SMART on FHIR sandbox
+
+## Repo Structure
+
+```text
+.
+├── .github/workflows/deploy-pages.yml
+├── public/
+├── src/
+│   ├── lib/
+│   ├── launch.ts
+│   ├── main.ts
+│   ├── mockData.ts
+│   ├── styles.css
+│   └── types.ts
+├── .env.example
+├── index.html
+├── launch.html
+├── package.json
+└── vite.config.ts
+```
+
+## Local Development
+
+1. Install dependencies:
 
 ```bash
 npm install
 ```
 
-### 2. Create your local env file
+2. Create a local env file:
 
 ```bash
 cp .env.example .env
 ```
 
-Edit `.env`:
+3. Edit `.env`:
 
 ```dotenv
 VITE_SMART_CLIENT_ID=your-epic-sandbox-client-id
@@ -47,13 +79,13 @@ VITE_FHIR_BASE_URL=https://fhir.epic.com/interconnect-fhir-oauth/api/FHIR/R4/
 VITE_SMART_SCOPES=launch/patient patient/Patient.read patient/Observation.read openid fhirUser
 ```
 
-### 3. Start local HTTPS dev
+4. Start the local HTTPS dev server:
 
 ```bash
 npm run dev
 ```
 
-Open:
+5. Open mock mode:
 
 ```text
 https://localhost:5173/?mock=true
@@ -65,103 +97,59 @@ Turner syndrome demo case:
 https://localhost:5173/?mock=true&case=turner-syndrome-demo
 ```
 
-## GitHub Pages Deployment
+## GitHub Pages
 
-This repo is now set up to deploy to GitHub Pages through GitHub Actions.
+This repo includes a GitHub Actions workflow for GitHub Pages deployment:
 
-### What the workflow does
+- workflow: `.github/workflows/deploy-pages.yml`
+- target repo: `dom-martinelli/growthbridge-demo`
+- expected public URL:
+  `https://dom-martinelli.github.io/growthbridge-demo/`
 
-- builds the Vite app with the correct Pages base path
-- publishes the contents of `dist/` to GitHub Pages
-- supports project Pages URLs like:
+After Pages is enabled in repository settings, the app URLs should be:
 
-```text
-https://YOUR-GITHUB-USERNAME.github.io/YOUR-REPO-NAME/
-```
-
-### Files added for Pages
-
-- [vite.config.ts](/Users/dominiero/Documents/Zaklab/notebooks/codex%20challenge/vite.config.ts)
-- [.github/workflows/deploy-pages.yml](/Users/dominiero/Documents/Zaklab/notebooks/codex%20challenge/.github/workflows/deploy-pages.yml)
-- [public/.nojekyll](/Users/dominiero/Documents/Zaklab/notebooks/codex%20challenge/public/.nojekyll)
-
-### How to enable Pages
-
-1. Push this project to GitHub.
-2. In GitHub, open `Settings -> Pages`.
-3. Set the source to `GitHub Actions`.
-4. Push to your default branch.
-5. Wait for the `Deploy to GitHub Pages` workflow to finish.
-
-Your public base URL will usually be:
-
-```text
-https://YOUR-GITHUB-USERNAME.github.io/YOUR-REPO-NAME/
-```
-
-### Exact Epic URLs for GitHub Pages
-
-If your repo is `growthbridge-demo` under `yourname`, the exact URLs are:
-
+- App root:
+  `https://dom-martinelli.github.io/growthbridge-demo/`
 - Launch URL:
-  `https://yourname.github.io/growthbridge-demo/launch.html`
+  `https://dom-martinelli.github.io/growthbridge-demo/launch.html`
 - Redirect URI:
-  `https://yourname.github.io/growthbridge-demo/index.html`
+  `https://dom-martinelli.github.io/growthbridge-demo/index.html`
 
 Mock mode on Pages:
 
 ```text
-https://yourname.github.io/growthbridge-demo/?mock=true
+https://dom-martinelli.github.io/growthbridge-demo/?mock=true
 ```
 
-Turner demo case on Pages:
+Turner syndrome demo case on Pages:
 
 ```text
-https://yourname.github.io/growthbridge-demo/?mock=true&case=turner-syndrome-demo
+https://dom-martinelli.github.io/growthbridge-demo/?mock=true&case=turner-syndrome-demo
 ```
 
-## Exact Epic Sandbox Registration Fields
+## Epic Sandbox Registration
 
-### App record
+For Epic sandbox registration, use these values:
 
+- Application audience: `Patients`
 - App type: browser/web SMART app
-- Intended launch pattern: EHR launch with patient context
-- FHIR version: R4
-- Redirect URI:
-  use your exact deployed `.../index.html`
+- FHIR version: `R4`
 - Launch URL:
-  use your exact deployed `.../launch.html`
-- Non-production client ID:
-  use the value Epic assigns after app creation
+  `https://dom-martinelli.github.io/growthbridge-demo/launch.html`
+- Redirect URI / Endpoint URI:
+  `https://dom-martinelli.github.io/growthbridge-demo/index.html`
+- Scopes:
+  `launch/patient patient/Patient.read patient/Observation.read openid fhirUser`
+- Confidential client: `No`
+- Dynamic client registration: `No`
 
-### Scopes used by this app
+Important details:
 
-```text
-launch/patient patient/Patient.read patient/Observation.read openid fhirUser
-```
+- Epic requires exact redirect URI matching.
+- `/index.html` is different from `/`.
+- Because this is a GitHub Pages project site, the repo subpath `/growthbridge-demo/` matters.
 
-### Runtime behavior
-
-- `launch.html` calls `FHIR.oauth2.authorize(...)`
-- `index.html` resolves the SMART session with `FHIR.oauth2.ready()`
-- the app reads:
-  - `Patient`
-  - `Observation` for height and weight vital signs
-
-## Important Pages Detail
-
-This app is now base-path aware.
-
-That matters because GitHub project Pages are usually deployed under a subpath like `/growthbridge-demo/`, not at the site root. The SMART redirect code now generates:
-
-- `https://origin/repo-name/index.html`
-- `https://origin/repo-name/launch.html`
-
-instead of incorrectly assuming:
-
-- `https://origin/index.html`
-
-## Build Commands
+## Build
 
 Standard build:
 
@@ -169,12 +157,14 @@ Standard build:
 npm run build
 ```
 
-Pages build uses the same Vite build command, but the GitHub Actions workflow sets `PUBLIC_BASE_PATH` automatically to the repository subpath.
+The Pages workflow uses the same build, but injects the repo base path automatically so generated asset URLs work under `/growthbridge-demo/`.
 
-## Current Scope Limits
+## Notes
 
-- No validated CDC/WHO percentile engine yet
-- Percentile labels in mock mode are curated demo annotations
-- No FHIR write-back
-- No backend token handling or refresh-token server flow
-- No condition-specific clinical recommendation engine
+- `.env` is intentionally ignored.
+- `node_modules/` and `dist/` are intentionally ignored.
+- `.env.example` is safe to commit because it contains placeholders only.
+
+## Medical / Demo Safety
+
+This repo is for demonstration and prototyping only. It does not provide medical advice, does not replace clinician judgment, and should not be interpreted as a validated diagnostic or treatment tool.
