@@ -17,6 +17,7 @@ export interface GrowthMeasurement {
   unit: "cm" | "kg";
   source: MeasurementSource;
   percentile?: number;
+  zScore?: number;
   note?: string;
 }
 
@@ -67,6 +68,7 @@ export interface TrendInsight {
   title: string;
   body: string;
   percentileLabel?: string;
+  zScore?: number;
 }
 
 export interface DemoScenarioOption {

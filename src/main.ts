@@ -1,5 +1,6 @@
 import "./styles.css";
 import { buildTooltipHtml, renderCombinedGrowthChart } from "./lib/chart";
+import { enrichMeasurementsWithDerivedZScores, findFlaggedHeightInsights } from "./lib/growthAnalysis";
 import {
   calculateAgeInMonths,
   calculateCorrectedAgeInMonths,
@@ -40,9 +41,12 @@ function renderApp(state: AppState): void {
   const measurements = [...state.measurements].sort(
     (left, right) => new Date(left.date).getTime() - new Date(right.date).getTime()
   );
+  const measurementsWithZScores = enrichMeasurementsWithDerivedZScores(measurements);
+  const trendInsights = findFlaggedHeightInsights(measurementsWithZScores);
+  const primaryTrendInsight = trendInsights[0] ?? null;
   const latestMeasurementDate = measurements[measurements.length - 1]?.date ?? new Date().toISOString().slice(0, 10);
-  const heightVelocity = calculateGrowthVelocity(measurements, "height");
-  const weightVelocity = calculateGrowthVelocity(measurements, "weight");
+  const heightVelocity = calculateGrowthVelocity(measurementsWithZScores, "height");
+  const weightVelocity = calculateGrowthVelocity(measurementsWithZScores, "weight");
   const midParentalHeight = calculateMidParentalTargetHeight(
     state.patient.sexAtBirth,
     state.parentHeights.motherHeightCm,
@@ -149,20 +153,21 @@ function renderApp(state: AppState): void {
 
       <section class="grid">
         <article class="card chart-card">
-          ${renderCombinedGrowthChart(measurements, state.trendInsight)}
+          ${renderCombinedGrowthChart(measurementsWithZScores, trendInsights)}
           ${
-            state.trendInsight
+            primaryTrendInsight
               ? `
                 <div class="insight-banner">
-                  <strong>${state.trendInsight.title}:</strong> ${state.trendInsight.body}
+                  <strong>${primaryTrendInsight.title}:</strong> ${primaryTrendInsight.body}
                 </div>
                 <p class="reference-copy">
-                  ${state.trendInsight.percentileLabel ?? "Percentile labels in mock mode are demo annotations for presentation only."}
+                  ${primaryTrendInsight.percentileLabel ?? "Flagging is based on computed height z-scores where available."}
+                  ${trendInsights.length > 1 ? ` ${trendInsights.length - 1} additional flagged measurement${trendInsights.length > 2 ? "s are" : " is"} highlighted on the chart.` : ""}
                 </p>
               `
               : `
                 <p class="reference-copy">
-                  Hover over each date to inspect the corresponding height and weight values together.
+                  Hover over each date to inspect the corresponding height and weight values together. No height measurements currently meet the `z < -2` flag threshold.
                 </p>
               `
           }
@@ -204,7 +209,7 @@ function renderApp(state: AppState): void {
                 </tr>
               </thead>
               <tbody>
-                ${measurements.map((measurement) => renderMeasurementRow(measurement)).join("")}
+                ${measurementsWithZScores.map((measurement) => renderMeasurementRow(measurement)).join("")}
               </tbody>
             </table>
           </div>

@@ -8,9 +8,10 @@ interface CombinedDatum {
 
 export function renderCombinedGrowthChart(
   measurements: GrowthMeasurement[],
-  trendInsight: TrendInsight | null
+  trendInsights: TrendInsight[]
 ): string {
   const data = buildCombinedData(measurements);
+  const flaggedDates = new Set(trendInsights.map((insight) => insight.date));
 
   if (data.length === 0) {
     return `<div class="empty-state">No growth measurements yet.</div>`;
@@ -89,8 +90,8 @@ export function renderCombinedGrowthChart(
     .map((point, index) => {
       const x = xForIndex(index);
       const hoverWidth = data.length === 1 ? 48 : Math.max(36, chartWidth / data.length);
-      const flagClass = point.date === trendInsight?.date ? "chart-flag-zone" : "";
-      const tooltipDataset = buildTooltipDataset(point, trendInsight);
+      const flagClass = flaggedDates.has(point.date) ? "chart-flag-zone" : "";
+      const tooltipDataset = buildTooltipDataset(point, flaggedDates.has(point.date));
       const hoverZone = `
         <rect
           x="${Math.max(padding.left, x - hoverWidth / 2)}"
@@ -121,9 +122,7 @@ export function renderCombinedGrowthChart(
     })
     .join("");
 
-  const flagMarkup = trendInsight
-    ? renderFlagMarkup(data, trendInsight, xForIndex, yForHeight, height, padding.bottom)
-    : "";
+  const flagMarkup = renderFlagMarkup(data, trendInsights, xForIndex, yForHeight, height, padding.bottom);
 
   return `
     <section class="analytics-card">
@@ -135,7 +134,7 @@ export function renderCombinedGrowthChart(
         <div class="chart-legend">
           <span><span class="legend-swatch height"></span>Height (cm)</span>
           <span><span class="legend-swatch weight"></span>Weight (kg)</span>
-          ${trendInsight ? `<span><span class="legend-swatch flagged"></span>Flagged</span>` : ""}
+          ${trendInsights.length > 0 ? `<span><span class="legend-swatch flagged"></span>Flagged</span>` : ""}
         </div>
       </div>
       <div class="chart-shell" data-chart-root>
@@ -171,6 +170,7 @@ export function buildTooltipHtml(target: HTMLElement): string {
     ${height ? `<div><span class="tooltip-key height"></span>Height (cm): <strong>${height}</strong></div>` : ""}
     ${weight ? `<div><span class="tooltip-key weight"></span>Weight (kg): <strong>${weight}</strong></div>` : ""}
     ${percentile ? `<div>Height percentile: <strong>${percentile}</strong></div>` : ""}
+    ${target.dataset.zScore ? `<div>Height z-score: <strong>${target.dataset.zScore}</strong></div>` : ""}
   `;
 }
 
@@ -235,12 +235,13 @@ function padRange(min: number, max: number, pad: number): { min: number; max: nu
   };
 }
 
-function buildTooltipDataset(point: CombinedDatum, trendInsight: TrendInsight | null): string {
+function buildTooltipDataset(point: CombinedDatum, isFlagged: boolean): string {
   const attributes = [
     point.height ? `data-height="${point.height.value.toFixed(1)}"` : "",
     point.weight ? `data-weight="${point.weight.value.toFixed(1)}"` : "",
     point.height?.percentile !== undefined ? `data-percentile="${ordinal(point.height.percentile)}"` : "",
-    point.date === trendInsight?.date ? `data-flag-title="${escapeHtml(trendInsight.title)}"` : ""
+    point.height?.zScore !== undefined ? `data-z-score="${point.height.zScore.toFixed(2)}"` : "",
+    isFlagged ? `data-flagged="true"` : ""
   ];
 
   return attributes.filter(Boolean).join(" ");
@@ -248,24 +249,28 @@ function buildTooltipDataset(point: CombinedDatum, trendInsight: TrendInsight | 
 
 function renderFlagMarkup(
   data: CombinedDatum[],
-  trendInsight: TrendInsight,
+  trendInsights: TrendInsight[],
   xForIndex: (index: number) => number,
   yForHeight: (value: number) => number,
   height: number,
   bottomPadding: number
 ): string {
-  const flagIndex = data.findIndex((point) => point.date === trendInsight.date && point.height);
-  if (flagIndex < 0 || !data[flagIndex].height) {
-    return "";
-  }
+  return trendInsights
+    .map((trendInsight) => {
+      const flagIndex = data.findIndex((point) => point.date === trendInsight.date && point.height);
+      if (flagIndex < 0 || !data[flagIndex].height) {
+        return "";
+      }
 
-  const x = xForIndex(flagIndex);
-  const y = yForHeight((data[flagIndex].height as GrowthMeasurement).value);
+      const x = xForIndex(flagIndex);
+      const y = yForHeight((data[flagIndex].height as GrowthMeasurement).value);
 
-  return `
-    <line x1="${x}" y1="${y - 24}" x2="${x}" y2="${height - bottomPadding}" class="chart-flag-line"></line>
-    <circle cx="${x}" cy="${y}" r="9" class="chart-flag-point"></circle>
-  `;
+      return `
+        <line x1="${x}" y1="${y - 24}" x2="${x}" y2="${height - bottomPadding}" class="chart-flag-line"></line>
+        <circle cx="${x}" cy="${y}" r="9" class="chart-flag-point"></circle>
+      `;
+    })
+    .join("");
 }
 
 function ordinal(value: number): string {
@@ -285,12 +290,4 @@ function ordinal(value: number): string {
   }
 
   return `${value}th`;
-}
-
-function escapeHtml(value: string): string {
-  return value
-    .replace(/&/g, "&amp;")
-    .replace(/"/g, "&quot;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;");
 }

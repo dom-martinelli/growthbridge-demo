@@ -63,12 +63,7 @@ export const demoScenarios: DemoScenario[] = [
       gestationalAgeWeeks: null
     },
     dataSourceLabel: "Mock EHR import with Turner syndrome teaching case",
-    trendInsight: {
-      date: "2022-09-15",
-      title: "Flagged 2022-09-15",
-      body: "Height dropped from about the 38th to the 18th percentile between 2022-03-15 and 2022-09-15. Consider evaluation for growth faltering.",
-      percentileLabel: "Height percentile fell from ~38th to ~18th."
-    },
+    trendInsight: null,
     measurements: [
       { id: "turner-h-1", type: "height", date: "2020-03-20", value: 50.2, unit: "cm", source: "EHR", percentile: 41 },
       { id: "turner-w-1", type: "weight", date: "2020-03-20", value: 3.5, unit: "kg", source: "EHR" },
@@ -84,9 +79,9 @@ export const demoScenarios: DemoScenario[] = [
       { id: "turner-w-6", type: "weight", date: "2022-03-15", value: 11.7, unit: "kg", source: "EHR" },
       { id: "turner-h-7", type: "height", date: "2022-09-15", value: 89.4, unit: "cm", source: "EHR", percentile: 18 },
       { id: "turner-w-7", type: "weight", date: "2022-09-15", value: 12.6, unit: "kg", source: "EHR" },
-      { id: "turner-h-8", type: "height", date: "2023-03-15", value: 91.8, unit: "cm", source: "EHR", percentile: 9 },
+      { id: "turner-h-8", type: "height", date: "2023-03-15", value: 91.8, unit: "cm", source: "EHR", percentile: 2 },
       { id: "turner-w-8", type: "weight", date: "2023-03-15", value: 13.2, unit: "kg", source: "EHR" },
-      { id: "turner-h-9", type: "height", date: "2023-09-15", value: 96.2, unit: "cm", source: "EHR", percentile: 20 },
+      { id: "turner-h-9", type: "height", date: "2023-09-15", value: 96.2, unit: "cm", source: "EHR", percentile: 3 },
       { id: "turner-w-9", type: "weight", date: "2023-09-15", value: 14.1, unit: "kg", source: "EHR" },
       { id: "turner-h-10", type: "height", date: "2024-03-15", value: 102.8, unit: "cm", source: "EHR", percentile: 46 },
       { id: "turner-w-10", type: "weight", date: "2024-03-15", value: 15.9, unit: "kg", source: "EHR" },
@@ -113,12 +108,7 @@ export const demoScenarios: DemoScenario[] = [
       gestationalAgeWeeks: 31
     },
     dataSourceLabel: "Mock EHR import with preterm catch-up example",
-    trendInsight: {
-      date: "2023-05-30",
-      title: "Reassuring catch-up trend",
-      body: "Corrected age places the post-discharge growth trend closer to the expected trajectory. This is included as context only, not as a diagnosis.",
-      percentileLabel: "Corrected age remains relevant for the first two years."
-    },
+    trendInsight: null,
     measurements: [
       { id: "preterm-h-1", type: "height", date: "2022-03-12", value: 44.0, unit: "cm", source: "EHR", percentile: 7 },
       { id: "preterm-w-1", type: "weight", date: "2022-03-12", value: 2.2, unit: "kg", source: "EHR" },
