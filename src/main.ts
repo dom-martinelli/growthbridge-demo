@@ -167,7 +167,7 @@ function renderApp(state: AppState): void {
               `
               : `
                 <p class="reference-copy">
-                  Hover over each date to inspect the corresponding height and weight values together. No height measurements currently meet the `z < -2` flag threshold.
+                  Hover over each date to inspect the corresponding height and weight values together. No height measurements currently meet the z &lt; -2 flag threshold.
                 </p>
               `
           }
